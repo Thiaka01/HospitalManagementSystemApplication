@@ -1,6 +1,6 @@
 package com.example.hospital.controllers;
 
-import com.example.hospital.entities.HospitalServiceEntity;
+import com.example.hospital.entities.Service;
 import com.example.hospital.services.HospitalServiceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,39 +12,40 @@ import java.util.Optional;
 @RequestMapping("/api/services")
 public class ServiceController {
 
-    private final HospitalServiceService hospitalService;
+    // Inject the Service Layer, not the Entity
+    private final HospitalServiceService hospitalServiceService;
 
-    public ServiceController(HospitalServiceService hospitalService) {
-        this.hospitalService = hospitalService;
+    public ServiceController(HospitalServiceService hospitalServiceService) {
+        this.hospitalServiceService = hospitalServiceService;
     }
 
     @PostMapping
-    public ResponseEntity<HospitalServiceEntity> createService(@RequestBody HospitalServiceEntity service) {
-        return ResponseEntity.ok(hospitalService.save(service));
+    public ResponseEntity<Service> createService(@RequestBody Service service) {
+        return ResponseEntity.ok(hospitalServiceService.save(service));
     }
 
     @GetMapping
-    public ResponseEntity<List<HospitalServiceEntity>> getAllServices() {
-        return ResponseEntity.ok(hospitalService.getAll());
+    public ResponseEntity<List<Service>> getAllServices() {
+        return ResponseEntity.ok(hospitalServiceService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<HospitalServiceEntity>> getServiceById(@PathVariable Integer id) {
-        return ResponseEntity.ok(hospitalService.getById(id));
+    public ResponseEntity<Optional<Service>> getServiceById(@PathVariable Integer id) {
+        return ResponseEntity.ok(hospitalServiceService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HospitalServiceEntity> updateService(
+    public ResponseEntity<Service> updateService(
             @PathVariable Integer id,
-            @RequestBody HospitalServiceEntity service
+            @RequestBody Service service // Changed from HospitalService to Service
     ) {
-        service.setId(id);
-        return ResponseEntity.ok(hospitalService.save(service));
+        service.setId(id); // Use the setter that matches your Entity ID field
+        return ResponseEntity.ok(hospitalServiceService.save(service));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteService(@PathVariable Integer id) {
-        hospitalService.delete(id);
+        hospitalServiceService.delete(id);
         return ResponseEntity.ok("Service deleted successfully");
     }
 }

@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediCore HMS</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════════
+       SIDEBAR
+  ══════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🏥</div>
+      <div class="sidebar-logo-text">
+        MediCore HMS
+        <span id="sidebarRoleText">Loading...</span>
+      </div>
+    </div>
+    <div class="sidebar-role-badge">
+      <span class="role-dot"></span>
+      <span class="role-name" id="roleBadge">—</span>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- Rendered by JS -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarUser">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-role" id="userRoleName">—</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Logout"><i class="fas fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-title">
+        <h1 id="headerTitle">Dashboard</h1>
+        <p id="headerSub">Welcome back</p>
+      </div>
+      <div class="header-spacer"></div>
+      <div class="header-search">
+        <span class="search-icon"><i class="fas fa-search"></i></span>
+        <input type="text" placeholder="Search patients, bills..." id="globalSearch" oninput="globalSearchHandler(this.value)">
+      </div>
+      <button class="header-btn" onclick="toast('No new alerts','info')">
+        <i class="fas fa-bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="header-btn" onclick="navigate('reports')">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+      <div class="header-date" id="liveDate">—</div>
+    </header>
+
+    <!-- Pages -->
+    <div class="page-content">
+
+      <!-- ══════════════════════════════════════
+           PAGE: DASHBOARD
+      ══════════════════════════════════════ -->
+      <div class="page active" id="page-dashboard">
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="qa-btn" onclick="openModal('modalNewPatient')"><span class="icon">👤</span><span class="label">New Patient</span></button>
+          <button class="qa-btn" onclick="openModal('modalNewAppt')"><span class="icon">📅</span><span class="label">Book Appointment</span></button>
+          <button class="qa-btn" onclick="openModal('modalNewLab')"><span class="icon">🔬</span><span class="label">Order Lab Test</span></button>
+          <button class="qa-btn" onclick="openModal('modalNewBill')"><span class="icon">🧾</span><span class="label">Create Bill</span></button>
+          <button class="qa-btn" onclick="navigate('reports')"><span class="icon">📊</span><span class="label">View Reports</span></button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card teal">
+            <div class="stat-header">
+              <div class="stat-icon-wrap teal"><i class="fas fa-users"></i></div>
+              <span class="stat-trend up">↑ 12%</span>
+            </div>
+            <div class="stat-value">248</div>
+            <div class="stat-label">Total Patients</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-header">
+              <div class="stat-icon-wrap green"><i class="fas fa-calendar-check"></i></div>
+              <span class="stat-trend up">↑ 8%</span>
+            </div>
+            <div class="stat-value">34</div>
+            <div class="stat-label">Today's Appointments</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-header">
+              <div class="stat-icon-wrap amber"><i class="fas fa-flask"></i></div>
+              <span class="stat-trend up">↑ 5%</span>
+            </div>
+            <div class="stat-value">18</div>
+            <div class="stat-label">Pending Lab Tests</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-header">
+              <div class="stat-icon-wrap red"><i class="fas fa-file-invoice-dollar"></i></div>
+              <span class="stat-trend down">↓ 3%</span>
+            </div>
+            <div class="stat-value">KES 142K</div>
+            <div class="stat-label">Revenue Today</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-header">
+              <div class="stat-icon-wrap purple"><i class="fas fa-bed"></i></div>
+              <span class="stat-trend up">↑ 2</span>
+            </div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Admitted Patients</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="fas fa-chart-line icon"></i> Patient Visits — Last 7 Days</span>
+              <div class="card-actions">
+                <select class="filter-select" style="font-size:.78rem;padding:5px 10px;">
+                  <option>This Week</option>
+                  <option>Last Month</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container"><canvas id="chartVisits"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="fas fa-chart-pie icon"></i> Dept Breakdown</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-container"><canvas id="chartDept"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <!-- Today's Appointments -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="fas fa-calendar-day icon"></i> Today's Appointments</span>
+              <button class="btn btn-sm btn-primary" onclick="navigate('appointments')">View All</button>
+            </div>
+            <div class="card-body" id="dashApptList"><!-- JS --></div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="fas fa-clock-rotate-left icon"></i> Recent Activity</span>
+            </div>
+            <div class="card-body">
+              <div class="activity-list">
+                <div class="activity-item"><span class="activity-dot teal"></span><span class="activity-text"><strong>Alice Mwangi</strong> — CBC result uploaded</span><span class="activity-time">09:12</span></div>
+                <div class="activity-item"><span class="activity-dot green"></span><span class="activity-text"><strong>PT-007</strong> — Appointment confirmed</span><span class="activity-time">09:30</span></div>
+                <div class="activity-item"><span class="activity-dot amber"></span><span class="activity-text"><strong>Amoxicillin</strong> stock below minimum</span><span class="activity-time">10:05</span></div>
+                <div class="activity-item"><span class="activity-dot red"></span><span class="activity-text"><strong>BILL-005</strong> — Payment overdue (Eva Njeri)</span><span class="activity-time">10:45</span></div>
+                <div class="activity-item"><span class="activity-dot teal"></span><span class="activity-text"><strong>Brian Omondi</strong> — Consultation completed</span><span class="activity-time">11:00</span></div>
+                <div class="activity-item"><span class="activity-dot green"></span><span class="activity-text"><strong>New patient</strong> — Grace Achieng registered</span><span class="activity-time">11:22</span></div>
+                <div class="activity-item"><span class="activity-dot amber"></span><span class="activity-text"><strong>Francis Otieno</strong> — Admitted to ICU</span><span class="activity-time">12:00</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory Alerts -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="fas fa-triangle-exclamation icon"></i> Inventory Alerts</span>
+            <button class="btn btn-sm btn-secondary" onclick="navigate('inventory')">Manage Stock</button>
+          </div>
+          <div class="card-body">
+            <div class="content-grid-3" style="margin:0">
+              <div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>Amoxicillin 250mg</span><span>80 / 100 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill amber" style="width:80%"></div></div>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>IV Drip Set</span><span>35 / 50 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill amber" style="width:70%"></div></div>
+                </div>
+              </div>
+              <div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>Blood Glucose Strips</span><span>20 / 30 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill red" style="width:67%"></div></div>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>Betadine Solution</span><span>12 / 20 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill amber" style="width:60%"></div></div>
+                </div>
+              </div>
+              <div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>Paracetamol 500mg</span><span>450 / 100 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill teal" style="width:100%"></div></div>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-label"><span>Surgical Gloves</span><span>200 / 50 min</span></div>
+                  <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /dashboard -->
+
+      <!-- ══════════════════════════════════════
+           PAGE: PATIENTS
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-patients">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Patient Records</div>
+            <div class="section-subtitle">Total: <span id="patientCount">0</span> patients registered</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewPatient')"><i class="fas fa-plus"></i> Register Patient</button>
+        </div>
+
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <span class="si"><i class="fas fa-search"></i></span>
+            <input type="text" placeholder="Search name, ID..." id="patientSearch" oninput="renderPatients()">
+          </div>
+          <select class="filter-select" id="patientStatusFilter" onchange="renderPatients()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Discharged</option>
+            <option>Critical</option>
+          </select>
+          <select class="filter-select" id="patientGenderFilter" onchange="renderPatients()">
+            <option value="">All Genders</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="exportTable('patientsTable','patients')"><i class="fas fa-download"></i> Export</button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table id="patientsTable">
+              <thead>
+                <tr>
+                  <th>Patient ID</th>
+                  <th>Name</th>
+                  <th>Age/Gender</th>
+                  <th>Blood</th>
+                  <th>Condition</th>
+                  <th>Phone</th>
+                  <th>Insurance</th>
+                  <th>Status</th>
+                  <th>Registered</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientsBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: APPOINTMENTS
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-appointments">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Appointment Scheduling</div>
+            <div class="section-subtitle">Double-booking prevention enabled</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewAppt')"><i class="fas fa-plus"></i> Book Appointment</button>
+        </div>
+
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <span class="si"><i class="fas fa-search"></i></span>
+            <input type="text" placeholder="Search patient, doctor..." id="apptSearch" oninput="renderAppointments()">
+          </div>
+          <select class="filter-select" id="apptStatusFilter" onchange="renderAppointments()">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Confirmed</option>
+            <option>Completed</option>
+            <option>Cancelled</option>
+          </select>
+          <select class="filter-select" id="apptDeptFilter" onchange="renderAppointments()">
+            <option value="">All Departments</option>
+            <option>Cardiology</option>
+            <option>Endocrinology</option>
+            <option>Orthopedics</option>
+            <option>Pulmonology</option>
+            <option>OB/GYN</option>
+            <option>Neurology</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="exportTable('apptsTable','appointments')"><i class="fas fa-download"></i> Export</button>
+        </div>
+
+        <!-- Appointment Stats Mini -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px" id="apptStats"><!-- JS --></div>
+
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table id="apptsTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Department</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="apptsBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: CONSULTATIONS
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-consultations">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Consultations & Visit Records</div>
+            <div class="section-subtitle">Doctor notes, diagnoses and prescriptions</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewConsult')"><i class="fas fa-plus"></i> New Consultation</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Diagnosis</th><th>Complaint</th><th>Prescription</th><th>Follow-Up</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="consultsBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: LAB
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-lab">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Laboratory Management</div>
+            <div class="section-subtitle">Track tests, specimens, and results</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewLab')"><i class="fas fa-plus"></i> Order Lab Test</button>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card teal"><div class="stat-header"><div class="stat-icon-wrap teal"><i class="fas fa-flask"></i></div></div><div class="stat-value">8</div><div class="stat-label">Total Tests</div></div>
+          <div class="stat-card amber"><div class="stat-header"><div class="stat-icon-wrap amber"><i class="fas fa-hourglass-half"></i></div></div><div class="stat-value">3</div><div class="stat-label">Pending</div></div>
+          <div class="stat-card green"><div class="stat-header"><div class="stat-icon-wrap green"><i class="fas fa-circle-check"></i></div></div><div class="stat-value">4</div><div class="stat-label">Completed</div></div>
+          <div class="stat-card red"><div class="stat-header"><div class="stat-icon-wrap red"><i class="fas fa-bolt"></i></div></div><div class="stat-value">1</div><div class="stat-label">Urgent</div></div>
+        </div>
+
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <span class="si"><i class="fas fa-search"></i></span>
+            <input type="text" placeholder="Search patient, test..." id="labSearch" oninput="renderLab()">
+          </div>
+          <select class="filter-select" id="labStatusFilter" onchange="renderLab()">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+          </select>
+          <select class="filter-select" id="labPriorityFilter" onchange="renderLab()">
+            <option value="">All Priority</option>
+            <option>Normal</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lab ID</th><th>Patient</th><th>Test Name</th><th>Specimen</th><th>Ordered By</th><th>Date</th><th>Priority</th><th>Status</th><th>Result</th><th>Cost</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="labBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: BILLING
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-billing">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Billing & Invoicing</div>
+            <div class="section-subtitle">Automated billing with itemized invoices</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewBill')"><i class="fas fa-plus"></i> Create Bill</button>
+        </div>
+
+        <!-- Bill Summary Banner -->
+        <div class="bill-summary">
+          <div style="font-family:var(--font-sans);font-size:.8rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Financial Overview — December 2024</div>
+          <div class="bill-summary-grid">
+            <div class="bill-summary-item"><div class="amount">KES 38,500</div><div class="label">Total Billed</div></div>
+            <div class="bill-summary-item"><div class="amount">KES 27,800</div><div class="label">Collected</div></div>
+            <div class="bill-summary-item"><div class="amount" style="color:var(--amber-500)">KES 10,700</div><div class="label">Outstanding</div></div>
+          </div>
+        </div>
+
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <span class="si"><i class="fas fa-search"></i></span>
+            <input type="text" placeholder="Search patient, bill ID..." id="billSearch" oninput="renderBilling()">
+          </div>
+          <select class="filter-select" id="billStatusFilter" onchange="renderBilling()">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Paid</option>
+            <option>Overdue</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bill ID</th><th>Patient</th><th>Date</th><th>Items</th><th>Total Amount</th><th>Insurance</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="billingBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: INVENTORY
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-inventory">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Inventory & Supplier Tracking</div>
+            <div class="section-subtitle">Monitor stock levels and reorder points</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewInventory')"><i class="fas fa-plus"></i> Add Item</button>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card teal"><div class="stat-header"><div class="stat-icon-wrap teal"><i class="fas fa-boxes-stacked"></i></div></div><div class="stat-value">10</div><div class="stat-label">Total Items</div></div>
+          <div class="stat-card green"><div class="stat-header"><div class="stat-icon-wrap green"><i class="fas fa-circle-check"></i></div></div><div class="stat-value">6</div><div class="stat-label">In Good Stock</div></div>
+          <div class="stat-card amber"><div class="stat-header"><div class="stat-icon-wrap amber"><i class="fas fa-triangle-exclamation"></i></div></div><div class="stat-value">3</div><div class="stat-label">Low Stock</div></div>
+          <div class="stat-card red"><div class="stat-header"><div class="stat-icon-wrap red"><i class="fas fa-circle-xmark"></i></div></div><div class="stat-value">1</div><div class="stat-label">Critical</div></div>
+        </div>
+
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <span class="si"><i class="fas fa-search"></i></span>
+            <input type="text" placeholder="Search item, supplier..." id="invSearch" oninput="renderInventory()">
+          </div>
+          <select class="filter-select" id="invCategoryFilter" onchange="renderInventory()">
+            <option value="">All Categories</option>
+            <option>Medication</option>
+            <option>PPE</option>
+            <option>Equipment</option>
+            <option>Consumables</option>
+            <option>Diagnostics</option>
+            <option>Antiseptics</option>
+          </select>
+          <select class="filter-select" id="invStatusFilter" onchange="renderInventory()">
+            <option value="">All Stock Status</option>
+            <option>Good</option>
+            <option>Low</option>
+            <option>Critical</option>
+          </select>
+          <button class="btn btn-secondary btn-sm"><i class="fas fa-truck"></i> Order Supplies</button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Item ID</th><th>Item Name</th><th>Category</th><th>Qty</th><th>Unit</th><th>Min Qty</th><th>Unit Cost</th><th>Supplier</th><th>Expiry</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: USERS
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-users">
+        <div class="section-header">
+          <div>
+            <div class="section-title">User Management</div>
+            <div class="section-subtitle">System users and role-based access control</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalNewUser')"><i class="fas fa-user-plus"></i> Add User</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User ID</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Department</th><th>Joined</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PAGE: REPORTS
+      ══════════════════════════════════════ -->
+      <div class="page" id="page-reports">
+        <div class="section-header">
+          <div><div class="section-title">Reports & Analytics</div><div class="section-subtitle">Hospital performance insights</div></div>
+          <div style="display:flex;gap:10px">
+            <select class="filter-select"><option>December 2024</option><option>November 2024</option></select>
+            <button class="btn btn-secondary btn-sm"><i class="fas fa-print"></i> Print</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card teal"><div class="stat-header"><div class="stat-icon-wrap teal"><i class="fas fa-users"></i></div><span class="stat-trend up">↑ 15%</span></div><div class="stat-value">248</div><div class="stat-label">Total Patients</div></div>
+          <div class="stat-card green"><div class="stat-header"><div class="stat-icon-wrap green"><i class="fas fa-stethoscope"></i></div><span class="stat-trend up">↑ 10%</span></div><div class="stat-value">186</div><div class="stat-label">Consultations</div></div>
+          <div class="stat-card amber"><div class="stat-header"><div class="stat-icon-wrap amber"><i class="fas fa-flask"></i></div><span class="stat-trend up">↑ 7%</span></div><div class="stat-value">94</div><div class="stat-label">Lab Tests Done</div></div>
+          <div class="stat-card purple"><div class="stat-header"><div class="stat-icon-wrap purple"><i class="fas fa-money-bill-wave"></i></div><span class="stat-trend up">↑ 20%</span></div><div class="stat-value">KES 2.8M</div><div class="stat-label">Monthly Revenue</div></div>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-chart-bar icon"></i> Monthly Revenue Trend</span></div>
+            <div class="card-body"><div class="chart-container"><canvas id="chartRevenue"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-chart-pie icon"></i> Billing Status</span></div>
+            <div class="card-body"><div class="chart-container"><canvas id="chartBillStatus"></canvas></div></div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-chart-line icon"></i> Lab Tests by Type</span></div>
+            <div class="card-body"><div class="chart-container"><canvas id="chartLabTypes"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-hospital icon"></i> Department Utilization</span></div>
+            <div class="card-body">
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Cardiology</span><span>42 patients</span></div><div class="progress-bar"><div class="progress-fill teal" style="width:85%"></div></div></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Orthopedics</span><span>38 patients</span></div><div class="progress-bar"><div class="progress-fill green" style="width:76%"></div></div></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>OB/GYN</span><span>35 patients</span></div><div class="progress-bar"><div class="progress-fill purple" style="width:70%"></div></div></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Endocrinology</span><span>29 patients</span></div><div class="progress-bar"><div class="progress-fill amber" style="width:58%"></div></div></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Pulmonology</span><span>24 patients</span></div><div class="progress-bar"><div class="progress-fill red" style="width:48%"></div></div></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Neurology</span><span>18 patients</span></div><div class="progress-bar"><div class="progress-fill navy" style="width:36%"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- New Patient Modal -->
+<div class="modal-overlay" id="modalNewPatient">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-user-plus" style="color:var(--teal-500)"></i> Register New Patient</div>
+      <button class="modal-close" onclick="closeModal('modalNewPatient')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-3">
+        <div><label class="field-label">Full Name *</label><input class="field-input" id="npName" placeholder="e.g. John Doe"></div>
+        <div><label class="field-label">Date of Birth *</label><input class="field-input" type="date" id="npDob"></div>
+        <div><label class="field-label">Gender *</label><select class="field-select" id="npGender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+      </div>
+      <div class="form-row form-row-3">
+        <div><label class="field-label">Phone *</label><input class="field-input" id="npPhone" placeholder="07XX-XXX-XXX"></div>
+        <div><label class="field-label">Email</label><input class="field-input" id="npEmail" placeholder="patient@email.com"></div>
+        <div><label class="field-label">Blood Group</label><select class="field-select" id="npBlood"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Address</label><input class="field-input" id="npAddress" placeholder="City, County"></div>
+        <div><label class="field-label">Insurance Provider</label><select class="field-select" id="npInsurance"><option>None</option><option>NHIF</option><option>AAR</option><option>CIC</option><option>Jubilee</option><option>Britam</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Known Allergies</label><input class="field-input" id="npAllergies" placeholder="e.g. Penicillin, None"></div>
+        <div><label class="field-label">Emergency Contact</label><input class="field-input" id="npEmergency" placeholder="Name + Phone"></div>
+      </div>
+      <div><label class="field-label">Primary Condition / Reason for Visit</label><textarea class="field-textarea" id="npCondition" placeholder="Briefly describe the patient's condition..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewPatient')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewPatient()"><i class="fas fa-save"></i> Register Patient</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Patient Modal -->
+<div class="modal-overlay" id="modalViewPatient">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-id-card" style="color:var(--teal-500)"></i> Patient Profile</div>
+      <button class="modal-close" onclick="closeModal('modalViewPatient')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="patientProfileBody"><!-- JS --></div>
+  </div>
+</div>
+
+<!-- New Appointment Modal -->
+<div class="modal-overlay" id="modalNewAppt">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-calendar-plus" style="color:var(--teal-500)"></i> Book Appointment</div>
+      <button class="modal-close" onclick="closeModal('modalNewAppt')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Patient *</label><select class="field-select" id="apptPatient"><option value="">Select patient</option></select></div>
+        <div><label class="field-label">Doctor *</label><select class="field-select" id="apptDoctor"><option value="">Select doctor</option><option>Dr. James Odhiambo</option><option>Dr. Mary Kariuki</option><option>Dr. Ann Muthoni</option><option>Dr. Paul Ochieng</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Department *</label><select class="field-select" id="apptDept"><option value="">Select department</option><option>Cardiology</option><option>Endocrinology</option><option>Orthopedics</option><option>Pulmonology</option><option>OB/GYN</option><option>Neurology</option><option>General</option></select></div>
+        <div><label class="field-label">Appointment Type</label><select class="field-select" id="apptType"><option>Consultation</option><option>Follow-up</option><option>Check-up</option><option>Emergency</option><option>Antenatal</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Date *</label><input type="date" class="field-input" id="apptDate"></div>
+        <div><label class="field-label">Time *</label><select class="field-select" id="apptTime"><option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option><option>16:00</option></select></div>
+      </div>
+      <div id="doubleBookingAlert" style="display:none;padding:10px 14px;background:var(--amber-100);color:var(--amber-600);border-radius:var(--radius-sm);font-size:.83rem;margin-bottom:10px;border:1px solid rgba(217,119,6,.2)"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Double-booking detected! This doctor already has an appointment at the selected time.</div>
+      <div><label class="field-label">Notes</label><textarea class="field-textarea" id="apptNotes" placeholder="Additional notes..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewAppt')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewAppt()"><i class="fas fa-calendar-check"></i> Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Lab Test Modal -->
+<div class="modal-overlay" id="modalNewLab">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-flask" style="color:var(--teal-500)"></i> Order Lab Test</div>
+      <button class="modal-close" onclick="closeModal('modalNewLab')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Patient *</label><select class="field-select" id="labPatient"></select></div>
+        <div><label class="field-label">Ordered By *</label><select class="field-select" id="labDoctor"><option>Dr. James Odhiambo</option><option>Dr. Mary Kariuki</option><option>Dr. Ann Muthoni</option><option>Dr. Paul Ochieng</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Test Name *</label><select class="field-select" id="labTestName"><option>Complete Blood Count</option><option>HbA1c Test</option><option>Rheumatoid Factor</option><option>Troponin Test</option><option>Urinalysis</option><option>X-Ray</option><option>MRI</option><option>CT Scan</option><option>Spirometry</option><option>Liver Function Test</option><option>Kidney Function Test</option><option>Thyroid Function Test</option></select></div>
+        <div><label class="field-label">Specimen Type</label><select class="field-select" id="labSpecimen"><option>Blood</option><option>Urine</option><option>Stool</option><option>Sputum</option><option>Imaging</option><option>Breath</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Priority</label><select class="field-select" id="labPriority"><option>Normal</option><option>Urgent</option></select></div>
+        <div><label class="field-label">Date</label><input type="date" class="field-input" id="labDate"></div>
+      </div>
+      <div><label class="field-label">Clinical Notes</label><textarea class="field-textarea" id="labNotes" placeholder="Clinical context for the lab..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewLab')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewLab()"><i class="fas fa-flask"></i> Order Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Bill Modal -->
+<div class="modal-overlay" id="modalNewBill">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-file-invoice-dollar" style="color:var(--teal-500)"></i> Create Invoice</div>
+      <button class="modal-close" onclick="closeModal('modalNewBill')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Patient *</label><select class="field-select" id="billPatient"></select></div>
+        <div><label class="field-label">Insurance</label><select class="field-select" id="billInsurance"><option>None</option><option>NHIF</option><option>AAR</option><option>CIC</option><option>Jubilee</option><option>Britam</option></select></div>
+      </div>
+      <div class="divider"></div>
+      <div style="margin-bottom:12px;font-family:var(--font-sans);font-size:.85rem;font-weight:700;color:var(--navy-700)">Bill Items</div>
+      <div id="billItemsList">
+        <div class="bill-item-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+          <div><label class="field-label">Description</label><input class="field-input" placeholder="e.g. Consultation Fee" oninput="updateBillTotal()"></div>
+          <div><label class="field-label">Qty</label><input class="field-input" type="number" value="1" min="1" oninput="updateBillTotal()"></div>
+          <div><label class="field-label">Rate (KES)</label><input class="field-input" type="number" placeholder="0" oninput="updateBillTotal()"></div>
+          <div><button class="btn btn-danger btn-icon btn-sm" style="margin-bottom:0" onclick="removeBillItem(this)" title="Remove"><i class="fas fa-trash"></i></button></div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="addBillItem()"><i class="fas fa-plus"></i> Add Item</button>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:14px">
+        <span style="font-size:.85rem;color:var(--navy-600)">Total Amount:</span>
+        <span id="billTotalDisplay" style="font-family:var(--font-sans);font-size:1.3rem;font-weight:800;color:var(--navy-900)">KES 0</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewBill')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewBill()"><i class="fas fa-save"></i> Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Bill Modal -->
+<div class="modal-overlay" id="modalViewBill">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-receipt" style="color:var(--teal-500)"></i> Invoice Details</div>
+      <button class="modal-close" onclick="closeModal('modalViewBill')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="billViewBody"><!-- JS --></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalViewBill')">Close</button>
+      <button class="btn btn-success" id="billMarkPaidBtn"><i class="fas fa-check"></i> Mark as Paid</button>
+      <button class="btn btn-primary" onclick="toast('Printing invoice...','info')"><i class="fas fa-print"></i> Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Inventory Modal -->
+<div class="modal-overlay" id="modalNewInventory">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-boxes-stacked" style="color:var(--teal-500)"></i> Add Inventory Item</div>
+      <button class="modal-close" onclick="closeModal('modalNewInventory')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Item Name *</label><input class="field-input" id="invName" placeholder="e.g. Paracetamol 500mg"></div>
+        <div><label class="field-label">Category *</label><select class="field-select" id="invCategory"><option>Medication</option><option>PPE</option><option>Equipment</option><option>Consumables</option><option>Diagnostics</option><option>Antiseptics</option></select></div>
+      </div>
+      <div class="form-row form-row-3">
+        <div><label class="field-label">Quantity *</label><input class="field-input" type="number" id="invQty" placeholder="0"></div>
+        <div><label class="field-label">Unit</label><select class="field-select" id="invUnit"><option>Tablets</option><option>Capsules</option><option>Pairs</option><option>Sets</option><option>Rolls</option><option>Pieces</option><option>Boxes</option><option>Bottles</option></select></div>
+        <div><label class="field-label">Min Qty</label><input class="field-input" type="number" id="invMinQty" placeholder="0"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Unit Cost (KES)</label><input class="field-input" type="number" id="invCost" placeholder="0"></div>
+        <div><label class="field-label">Expiry Date</label><input class="field-input" type="date" id="invExpiry"></div>
+      </div>
+      <div><label class="field-label">Supplier</label><input class="field-input" id="invSupplier" placeholder="Supplier company name"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewInventory')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewInventory()"><i class="fas fa-save"></i> Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Consultation Modal -->
+<div class="modal-overlay" id="modalNewConsult">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-stethoscope" style="color:var(--teal-500)"></i> New Consultation</div>
+      <button class="modal-close" onclick="closeModal('modalNewConsult')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Patient *</label><select class="field-select" id="cPatient"></select></div>
+        <div><label class="field-label">Doctor *</label><select class="field-select" id="cDoctor"><option>Dr. James Odhiambo</option><option>Dr. Mary Kariuki</option><option>Dr. Ann Muthoni</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Date</label><input type="date" class="field-input" id="cDate"></div>
+        <div><label class="field-label">Follow-Up Date</label><input type="date" class="field-input" id="cFollowUp"></div>
+      </div>
+      <div><label class="field-label">Chief Complaint *</label><textarea class="field-textarea" id="cComplaint" placeholder="Patient's presenting complaint..."></textarea></div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Diagnosis *</label><input class="field-input" id="cDiagnosis" placeholder="ICD-10 diagnosis"></div>
+        <div><label class="field-label">Prescription</label><input class="field-input" id="cPrescription" placeholder="Drug name, dose, frequency"></div>
+      </div>
+      <div><label class="field-label">Notes</label><textarea class="field-textarea" id="cNotes" placeholder="Doctor's notes..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewConsult')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewConsult()"><i class="fas fa-save"></i> Save Consultation</button>
+    </div>
+  </div>
+</div>
+
+<!-- New User Modal -->
+<div class="modal-overlay" id="modalNewUser">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-user-plus" style="color:var(--teal-500)"></i> Add System User</div>
+      <button class="modal-close" onclick="closeModal('modalNewUser')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Full Name *</label><input class="field-input" id="uName" placeholder="Full name"></div>
+        <div><label class="field-label">Role *</label><select class="field-select" id="uRole"><option value="">Select role</option><option>Administrator</option><option>Doctor</option><option>Receptionist</option><option>Lab Technician</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Email *</label><input class="field-input" id="uEmail" placeholder="user@medicore.com" type="email"></div>
+        <div><label class="field-label">Phone</label><input class="field-input" id="uPhone" placeholder="07XX-XXX-XXX"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div><label class="field-label">Department</label><input class="field-input" id="uDept" placeholder="e.g. Cardiology"></div>
+        <div><label class="field-label">Temporary Password *</label><input class="field-input" type="password" id="uPass" placeholder="Min 8 chars, upper+lower+num"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNewUser')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewUser()"><i class="fas fa-save"></i> Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lab Result Modal -->
+<div class="modal-overlay" id="modalLabResult">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-microscope" style="color:var(--teal-500)"></i> Enter Lab Result</div>
+      <button class="modal-close" onclick="closeModal('modalLabResult')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="labResultBody"><!-- JS --></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalLabResult')">Cancel</button>
+      <button class="btn btn-primary" id="labResultSaveBtn"><i class="fas fa-save"></i> Save Result</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

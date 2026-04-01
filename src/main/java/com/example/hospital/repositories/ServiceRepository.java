@@ -1,10 +1,15 @@
 package com.example.hospital.repositories;
 
-import com.example.hospital.entities.HospitalServiceEntity;
+import com.example.hospital.entities.Service;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface ServiceRepository extends JpaRepository<HospitalServiceEntity, Integer> {
+public interface ServiceRepository extends JpaRepository<Service, Integer> {
+
+    List<Service> findByNameContainingIgnoreCaseOrderByNameAsc(String q);
+
+    List<Service> findByInactiveOrderByNameAsc(boolean inactive);
 }
-    // Additional query methods can be added here if needed

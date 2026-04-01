@@ -4,8 +4,10 @@ import com.example.hospital.entities.LabTest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface LabTestRepository extends JpaRepository<LabTest, Integer> {
-    // Example: find tests by status
-    // List<LabTest> findByStatus(LabTest.Status status);
+
+    List<LabTest> findByVisit_IdOrderByIdAsc(Integer visitId);
 }

@@ -1,5 +1,6 @@
 package com.example.hospital.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -15,10 +16,11 @@ public class Bill {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer billId;
+    private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "visit_id", unique = true, nullable = false)
+    @JsonIgnore
     private Visit visit;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,11 +34,35 @@ public class Bill {
     @Column(nullable = false)
     private Status status = Status.DRAFTED;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal totalAmount = BigDecimal.ZERO;
+
+    private String itemType;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal paidMobile = BigDecimal.ZERO;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal paidCash = BigDecimal.ZERO;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal paidCard = BigDecimal.ZERO;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal paidCheque = BigDecimal.ZERO;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal totalPaid = BigDecimal.ZERO;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal openBalance = BigDecimal.ZERO;
 
     public enum Status {
         DRAFTED,
         COMPLETED
+    }
+
+    public Integer getVisitId() {
+        return visit == null ? null : visit.getId();
     }
 }

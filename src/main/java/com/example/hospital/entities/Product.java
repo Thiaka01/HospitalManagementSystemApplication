@@ -1,49 +1,49 @@
 package com.example.hospital.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "products")
+@Data
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private String name;
-    private Double price;
-    private Integer quantity;
 
-    // ===== GETTERS & SETTERS =====
+    @Column(precision = 14, scale = 2)
+    private BigDecimal lastBuyPrice = BigDecimal.ZERO;
 
-    public Integer getId() {
-        return id;
-    }
+    @Column(precision = 14, scale = 2)
+    private BigDecimal unitSellingPrice = BigDecimal.ZERO;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    private Integer reorderLevel = 0;
 
-    public String getName() {
-        return name;
-    }
+    private Integer quantity = 0;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    private LocalDate dateReceived;
 
-    public Double getPrice() {
-        return price;
-    }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+    private boolean inactive;
 
-    public Integer getQuantity() {
-        return quantity;
-    }
+    private boolean expires;
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    private LocalDate expiryDate;
+
+    @PrePersist
+    protected void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hospital Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2>Hospital Performance Dashboard</h2>
+
+    <form th:action="@{/admin/dashboard}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label class="form-label">Start Date
+                <input type="date" name="start" th:value="${startDate}" class="form-control" />
+            </label>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">End Date
+                <input type="date" name="end" th:value="${endDate}" class="form-control" />
+            </label>
+        </div>
+        <div class="col-auto d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6>Patients Served</h6>
+                    <h2 th:text="${data != null ? data.patientsServed : 0}">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Total Revenue</h6>
+                    <h2>KSh
+                        <span th:text="${(data != null && data.totalRevenue != null) ? #numbers.formatDecimal(data.totalRevenue, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6>Avg Revenue / Patient</h6>
+                    <h2 th:text="${data != null ? data.averageRevenuePerPatient : '0.00'}">0.00</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

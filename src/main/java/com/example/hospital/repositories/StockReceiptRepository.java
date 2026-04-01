@@ -1,0 +1,13 @@
+package com.example.hospital.repositories;
+
+import com.example.hospital.entities.StockReceipt;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface StockReceiptRepository extends JpaRepository<StockReceipt, Integer> {
+
+    List<StockReceipt> findAllByOrderByDateReceivedDesc();
+}

@@ -1,7 +1,9 @@
 package com.example.hospital.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -14,10 +16,11 @@ public class BillItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer billItemId;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id", nullable = false)
+    @JsonIgnore
     private Bill bill;
 
     @Enumerated(EnumType.STRING)
@@ -25,11 +28,11 @@ public class BillItem {
     private ItemType itemType;
 
     @Column(nullable = false)
-    private Integer itemRefId; // Reference ID of the product or service
+    private Integer itemRefId;
 
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal amount;
 
     @Column(nullable = false)
@@ -38,5 +41,9 @@ public class BillItem {
     public enum ItemType {
         PRODUCT,
         SERVICE
+    }
+
+    public Integer getBillId() {
+        return bill == null ? null : bill.getId();
     }
 }

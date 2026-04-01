@@ -1,5 +1,6 @@
 package com.example.hospital.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,10 +14,12 @@ public class LabTest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer testId;
+    @Column(name = "test_id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "visit_id", nullable = false)
+    @JsonIgnore
     private Visit visit;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,6 +32,12 @@ public class LabTest {
     @Column(columnDefinition = "TEXT")
     private String result;
 
+    @Column(columnDefinition = "TEXT")
+    private String referenceRange;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.PENDING;
@@ -36,5 +45,9 @@ public class LabTest {
     public enum Status {
         PENDING,
         COMPLETED
+    }
+
+    public Integer getVisitId() {
+        return visit == null ? null : visit.getId();
     }
 }
